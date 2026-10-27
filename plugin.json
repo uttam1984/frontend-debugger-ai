@@ -1,0 +1,7 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "frontend-debugger-ai",
+  "version": "0.1.0",
+  "description": "AI-assisted frontend debugging for Copilot. Investigates UI behavior, JavaScript errors, DOM/CSS and network failures on a user-supplied page, and traces evidence into application source.",
+  "keywords": ["ai", "frontend", "debugging", "browser", "copilot"]
+}
