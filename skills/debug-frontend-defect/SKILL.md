@@ -1,11 +1,11 @@
 ---
 name: debug-frontend-defect
-description: Reproduce a frontend defect in a browser, inspect DOM/CSS, console and network evidence, trace it into repository code, and report the supported root cause. Use for browser-based defect diagnosis; source fixes and PRs require a request covering those actions.
+description: Reproduce a frontend defect or compare explicitly supplied AEM author configuration with its published page, inspect browser evidence, trace it into repository code, and report the supported cause. Use for browser-based diagnosis and read-only AEM-to-live validation; source or AEM changes require a request covering those actions.
 ---
 
 # Debug a frontend defect
 
-Use a browser-first investigation and connect observed failures to source code. Diagnose by default: do not change source files, create branches, or publish a PR unless requested. Browser interactions required to reproduce the issue are part of investigation; use the intended test session and avoid booking, payment, account changes or other irreversible actions without explicit scope.
+Use a browser-first investigation and connect observed failures to source code. Diagnose by default: do not change source files, create branches, modify AEM content, activate/deactivate/publish AEM content, or publish a PR unless requested. Browser interactions required to reproduce the issue are part of investigation; use the intended test session and avoid booking, payment, account changes or other irreversible actions without explicit scope.
 
 Read the target repository's AGENTS.md and relevant package instructions. Use [investigation-template.md](investigation-template.md) to record the expected behavior and reproduction conditions. An issue description in chat is sufficient; no mandatory repository configuration is needed. Use [report-template.md](report-template.md) for the final report. Write sanitized artifacts only to a requested location or host-approved temporary directory, and return their paths.
 
@@ -21,7 +21,17 @@ If loading the supplied URL redirects to a different page, or an unexpected navi
 
 Assets, API requests, third-party scripts and embedded frames loaded by the supplied page remain evidence for that page, even when their URLs use another domain. Inspect their captured details through the target page's tools; do not navigate to those URLs, independently test the endpoints, or interact with embedded third-party applications without an explicit scope extension. Read relevant repository files to trace this page's evidence, without expanding browser testing to other routes.
 
-Determine the URL, expected/actual behavior, reproduction steps, environment, tenant/market/language, viewport and relevant login state. Ask only for missing details that block reproduction while continuing available source inspection. Do not guess a start command, tenant, target page or production permission. Inspect repository scripts before starting a server.
+### AEM author-to-published validation
+
+Use this mode only when the user explicitly supplies both a published page URL and an AEM author/editor configuration URL, and asks for their comparison. Those two direct URLs form the complete browser boundary for the comparison. Record one page ID for the published page and one for the author page; do not inspect other author pages, content fragments, assets, links, APIs or routes unless they are separately supplied and authorized.
+
+Treat AEM as read-only. You may open authoring dialogs, expand panels and read visible configuration values needed for comparison, but never change field values, save, cancel a dirty state, publish, activate, deactivate, lock, unlock, create, delete or move content. Do not invoke AEM APIs that mutate content. If the author URL requires authentication, let the user log in manually in the isolated browser; never request credentials. A redirect to a login page or another AEM route still needs the user to supply or authorize that destination before inspection.
+
+Define the comparison before acting: component name/path when known, expected live values, tenant/market/language, viewport, and the fields to compare. Compare author configuration against the published page's rendered text, rich text, images and alt text, CTA label/destination, visibility, order and component placement. Preserve the distinction between configured data and rendered output: personalization, feature flags, publish state, cache/CDN, locale fallback, client-side transformations and inaccessible configuration can each explain a difference. Do not call a difference an AEM defect solely because author and live values differ.
+
+For every mismatch, capture matched author/live snapshots and identify the smallest supported classification: configuration/content, publish/cache/rollout, frontend rendering, API/integration, environment/personalization, or unresolved. Check console/network evidence only when it can distinguish these explanations. If publish status, activation time, cache headers, targeting context or deployment identity is unavailable, record it as a limitation rather than inferring it from the visible result.
+
+Determine the URL, expected/actual behavior, reproduction steps, environment, tenant/market/language, viewport and relevant login state. For AEM validation, determine both direct URLs, the component/content path when known, the fields to compare and the expected published values. Ask only for missing details that block reproduction while continuing available source inspection. Do not guess a start command, tenant, target page or production permission. Inspect repository scripts before starting a server.
 
 Use the plugin's `frontend-debugger-browser` MCP tools when available. Tool names may be prefixed by the host; discover their current schemas rather than inventing parameters. An existing equivalent browser provider may be used if it exposes the required evidence, but keep one provider/session for the investigation and record missing capabilities.
 
@@ -40,6 +50,7 @@ Start from the reported symptom and record a provisional defect category, primar
 | Missing or incorrect data | Relevant requests/responses, API contract and state mapping | Console and rendered DOM |
 | JavaScript crash | Exception stack and execution path | Related requests and resulting UI state |
 | Slow or stuck operation | Request timing, pending work, rendering and loading state | Console errors and before/after snapshots |
+| AEM configuration differs from published content | Matched author/live component fields and snapshots | Publish state, cache, targeting/personalization and frontend transformation evidence |
 
 These are starting points, not ownership conclusions. Expand or change focus when evidence contradicts the initial category or crosses layers. Do not dismiss an error because it falls outside the initial focus. Collect console/network events before reproduction even when deep analysis of one category may be unnecessary; this preserves evidence if the focus changes. Record why deeper checks were skipped. A requested full console/network audit requires comprehensive review of both for the specified page, interactions and observation interval; it does not authorize broader navigation or an exhaustive site test.
 
@@ -83,7 +94,7 @@ For Parts Catalog, review tenant/market/language/portal context, backend subtena
 
 ## Report and optional fix
 
-Report whether reproduction succeeded, the evidence-to-code causal chain, and the responsible layer: DOM/CSS, frontend JS/state, API contract, service boundary, environment, mixed or unresolved. Label findings as confirmed, likely or unresolved, with reasons and disconfirming evidence. Confirmation requires reproduction plus a distinguishing observation/experiment supporting the causal mechanism; merely finding suspicious code is insufficient.
+Report whether reproduction succeeded, the evidence-to-code causal chain, and the responsible layer: DOM/CSS, frontend JS/state, API contract, service boundary, environment, AEM configuration/publish boundary, mixed or unresolved. Label findings as confirmed, likely or unresolved, with reasons and disconfirming evidence. Confirmation requires reproduction plus a distinguishing observation/experiment supporting the causal mechanism; merely finding suspicious code or a raw author/live difference is insufficient.
 
 Give the smallest next action and a verification plan. If service logs, deployment revision, login or source maps are missing, say precisely what would resolve the uncertainty. Do not invent tool results or claim an end-to-end root cause beyond available evidence.
 

@@ -1,0 +1,33 @@
+name: Bob installer compatibility
+
+on:
+  push:
+    paths:
+      - 'scripts/**'
+      - 'skills/**'
+      - 'mcp.json'
+      - '.github/workflows/bob-installer.yml'
+  pull_request:
+    paths:
+      - 'scripts/**'
+      - 'skills/**'
+      - 'mcp.json'
+      - '.github/workflows/bob-installer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+        node: [22, 24]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: node --test scripts/install-bob.test.mjs

@@ -10,6 +10,8 @@ Record URL/environment, browser/viewport, tenant/market/language, login state, d
 
 Record the supplied page URL, target page ID, any redirects or unexpected navigation, and any explicit scope extensions. Identify interactions blocked by the page boundary.
 
+For AEM validation, record the supplied published URL and AEM author URL, their page IDs, the component/content path, compared fields, author login state and known publish/cache/targeting context. Confirm that the work was read-only and list any comparison that could not be performed.
+
 ## Capture coverage
 
 Record the provisional defect category, selected primary evidence and supporting checks, including any change in focus and why. State whether the task was a focused diagnosis or full console/network audit.
@@ -32,6 +34,16 @@ Include the evidence types relevant to the defect; do not invent console or netw
 
 Describe how the initial failure leads to the visible symptom. Link sanitized artifacts and repository files where available. Avoid copying full request bodies or credentials. Separate observations from inferences.
 
+## AEM author-to-published comparison
+
+Include this section only when AEM validation was requested. For each component/field, show the author configuration, published rendering, result and supported classification. Do not include sensitive authoring data.
+
+| Component / field | AEM author value | Published value | Result and classification |
+| --- | --- | --- | --- |
+| Component path or name | Sanitized configured value | Rendered value or state | Match / mismatch: configuration, publish/cache, frontend, API/integration, environment/personalization, or unresolved |
+
+Link matched author/live snapshots. A visible difference alone does not prove that author configuration is wrong; explain the evidence for or against publish state, caching, locale fallback, targeting, frontend transformation and integration behavior.
+
 ## Root-cause validation
 
 Describe the trigger -> failing operation -> state/rendering change -> symptom, identifying the specific failed condition and relevant file/symbol/line with deployment-match confidence. Distinguish the observed browser mechanism from any underlying cause that remains unverified.
@@ -40,7 +52,7 @@ Record the leading hypothesis, strongest plausible alternative, distinguishing o
 
 ## Ownership and alternatives
 
-State the observed failure layer and supported ownership. For a service boundary failure, include a safe correlation ID if available and the backend evidence still needed. List plausible alternatives tested or not yet excluded.
+State the observed failure layer and supported ownership. For an AEM comparison, distinguish content/configuration ownership from publish/cache, frontend, API/integration and personalization/environment ownership. For a service boundary failure, include a safe correlation ID if available and the backend evidence still needed. List plausible alternatives tested or not yet excluded.
 
 ## Next action and verification
 
