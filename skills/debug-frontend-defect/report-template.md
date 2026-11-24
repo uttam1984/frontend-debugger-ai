@@ -6,9 +6,9 @@
 
 ## Reproduction
 
-Record URL/environment, browser/viewport, tenant/market/language, login state, deployed/local revision match, exact steps, expected result and actual result. State whether reproduction succeeded. Omit sensitive URL parameters and test data.
+Record investigation mode (browser-only or browser plus source), URL/environment, browser/viewport, login state, exact steps, expected result and actual result. Include tenant/market/language and deployed/local revision match when applicable. State whether matching application source is available; do not treat the plugin checkout as application source. State whether reproduction succeeded. Omit sensitive URL parameters and test data.
 
-Record the supplied page URL, target page ID, any redirects or unexpected navigation, and any explicit scope extensions. Identify interactions blocked by the page boundary.
+Record the role-to-page-ID registry, supplied URLs, approved route/origin and authentication boundaries, redirects and scope extensions. Identify interactions blocked by the declared scope. Keep evidence from separate targets distinct.
 
 For AEM validation, record the supplied published URL and AEM author URL, their page IDs, the component/content path, compared fields, author login state and known publish/cache/targeting context. Confirm that the work was read-only and list any comparison that could not be performed.
 
@@ -46,7 +46,7 @@ Link matched author/live snapshots. A visible difference alone does not prove th
 
 ## Root-cause validation
 
-Describe the trigger -> failing operation -> state/rendering change -> symptom, identifying the specific failed condition and relevant file/symbol/line with deployment-match confidence. Distinguish the observed browser mechanism from any underlying cause that remains unverified.
+Describe the trigger -> failing operation -> state/rendering change -> symptom, identifying the specific failed condition and, when source is available, the relevant file/symbol/line with deployment-match confidence. For browser-only investigations, cite captured browser evidence and loaded-script locations when available; mark original source attribution as unavailable rather than inventing file references. Distinguish the observed browser mechanism from any underlying cause that remains unverified.
 
 Record the leading hypothesis, strongest plausible alternative, distinguishing observation/experiment, predicted outcome and actual outcome. Explain which evidence supports the conclusion and what remains unresolved. An error list or screenshot alone is insufficient for a confirmed root cause.
 

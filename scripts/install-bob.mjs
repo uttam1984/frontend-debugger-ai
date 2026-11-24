@@ -1,16 +1,18 @@
 #!/usr/bin/env node
-import { cp, lstat, mkdir, readFile, realpath, writeFile } from 'node:fs/promises';
+import { cp, lstat, mkdir, readFile, readdir, realpath, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createBobConfig } from './bob-config.mjs';
 
 const usage = `Usage:
-  node scripts/install-bob.mjs --workspace /absolute/path/to/application
   node scripts/install-bob.mjs --global
+  node scripts/install-bob.mjs --workspace /absolute/path/to/workspace
 
+Use --global for reuse across applications; --workspace only limits plugin discovery.
+The investigation URL selects the target application; source is optional.
 Add --update to refresh an installation created by this installer.
-Existing managed files are backed up before an update. Requires Node.js 22+.`;
+Existing managed files are backed up before an update. Requires Node.js 22.12+ or Node 24+.`;
 const marker = '.frontend-debugger-ai-install.json';
 const pluginName = 'frontend-debugger-ai';
 
@@ -25,6 +27,19 @@ async function rejectSymlinks(target) {
     const stat = await exists(current);
     if (stat?.isSymbolicLink()) throw new Error(`Refusing symbolic link: ${current}`);
     if (current === path.dirname(current)) break;
+  }
+}
+
+// Package every shared skill and its references/assets, preserving relative links.
+async function collectFiles(directory, prefix, files) {
+  for (const entry of await readdir(directory, { withFileTypes: true })) {
+    if (entry.name.startsWith('.')) continue;
+    const source = path.join(directory, entry.name);
+    const relative = path.join(prefix, entry.name);
+    if (entry.isSymbolicLink()) throw new Error(`Refusing symbolic link in plugin source: ${source}`);
+    if (entry.isDirectory()) await collectFiles(source, relative, files);
+    else if (entry.isFile()) files.set(relative, await readFile(source));
+    else throw new Error(`Unsupported plugin source file: ${source}`);
   }
 }
 
@@ -50,12 +65,9 @@ async function main() {
   const server = sourceConfig.mcpServers['frontend-debugger-browser'];
   // Bob documents command/args/cwd/env for stdio, without a type field.
   const config = createBobConfig(server, destination);
-  const skillName = 'debug-frontend-defect';
-  const skillFiles = ['SKILL.md', 'investigation-template.md', 'report-template.md'];
   const files = new Map([['mcp.json', `${JSON.stringify(config, null, 2)}\n`]]);
-  for (const file of skillFiles) {
-    files.set(path.join('skills', skillName, file), await readFile(path.join(sourceRoot, 'skills', skillName, file)));
-  }
+  await collectFiles(path.join(sourceRoot, 'skills'), 'skills', files);
+  if (![...files.keys()].some(file => path.basename(file) === 'SKILL.md')) throw new Error('No skills found in plugin source.');
   const installed = await exists(destination);
   if (installed) {
     if (!installed.isDirectory()) throw new Error(`Not a directory: ${destination}`);

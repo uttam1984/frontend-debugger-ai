@@ -1,4 +1,4 @@
-name: Bob installer compatibility
+name: Plugin compatibility
 
 on:
   push:
@@ -6,12 +6,16 @@ on:
       - 'scripts/**'
       - 'skills/**'
       - 'mcp.json'
+      - 'plugin.json'
+      - 'tests/**'
       - '.github/workflows/bob-installer.yml'
   pull_request:
     paths:
       - 'scripts/**'
       - 'skills/**'
       - 'mcp.json'
+      - 'plugin.json'
+      - 'tests/**'
       - '.github/workflows/bob-installer.yml'
   workflow_dispatch:
 
@@ -20,7 +24,9 @@ permissions:
 
 jobs:
   installer:
+    timeout-minutes: 10
     strategy:
+      fail-fast: false
       matrix:
         os: [windows-latest, macos-latest, ubuntu-latest]
         node: [22, 24]
@@ -31,3 +37,6 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node --test scripts/install-bob.test.mjs
+      - name: Browser infrastructure smoke check
+        if: matrix.node == 24
+        run: node scripts/smoke-browser.mjs --browser

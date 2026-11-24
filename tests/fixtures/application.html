@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Debugger application fixture</title>
+<style>
+  body { font-family: Arial, sans-serif; padding: 24px; }
+  #headline { font-size: 28px; line-height: 40px; color: rgb(0, 80, 164); margin: 0 0 24px; }
+  #card { padding: 24px; border: 1px solid #ccc; }
+</style>
+<h1 id="headline">Example application</h1>
+<section id="card">
+  <button id="crash">Trigger JavaScript defect</button>
+  <button id="api">Trigger API failure</button>
+  <output id="status" aria-live="polite">Ready</output>
+</section>
+<script>
+  document.querySelector('#crash').addEventListener('click', () => {
+    throw new Error('FIXTURE_JS_DEFECT: missing result handling');
+  });
+  document.querySelector('#api').addEventListener('click', async () => {
+    const response = await fetch('/api/failure');
+    document.querySelector('#status').textContent = `API status ${response.status}`;
+  });
+</script>
+</html>
